@@ -1,0 +1,9 @@
+resolver: lts-12.24
+
+packages:
+- .
+
+extra-deps:
+- matrix-0.3.6.1
+- github: forsyde/forsyde-shallow
+  commit: f045c133d19b495394cfa9c81b54bfe726f5a104
