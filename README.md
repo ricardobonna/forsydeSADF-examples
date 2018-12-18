@@ -6,7 +6,7 @@ RISC processor and MPEG-4 decoder examples using ForSyDe-SADF.
 
 This is a temporary repository for the case study for the paper
 
-R. Bonna, D. S. Loubach, G. Ungureanu and I. Sander, _Modeling and Simulation of Dynamic Applications using Scenario-Aware Dataflow_
+R. Bonna, D. S. Loubach, G. Ungureanu and I. Sander. _Modeling and Simulation of Dynamic Applications using Scenario-Aware Dataflow_
 
 In the future these examples will be migrated and integrated to [`forsyde-shallow-examples`](https://github.com/forsyde/forsyde-shallow-examples).
 
