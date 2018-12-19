@@ -39,10 +39,22 @@ executables:
     - forsyde-sadf-examples
 
 tests:
-  forsyde-sadf-test:
-    main:                Spec.hs
+  mpeg-example:
+    main:                MpegExample.hs
     source-dirs:         test
     ghc-options:
+    - -main-is           MpegExample
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - forsyde-sadf-examples
+    
+  risc-example:
+    main:                RiscExample.hs
+    source-dirs:         test
+    ghc-options:
+    - -main-is           RiscExample
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N

@@ -40,9 +40,11 @@ The source files can be found in the [`src/`](src) directory. To load them into 
 
     stack ghci
 
-To run the provided test suite defined in in [`test/Spec.hs`](test/Spec.hs) with example input values, type in
+To run the provided test suites defined in in [`test/`](test/) with example input values, type in
 
-    stack test
+    stack build :risc-example         # executes the RISC example in the paper
+	stack build :mpeg-example         # executes the MPEG4 example with test input
+	stack test                        # runs both previous examples
 
 These examples generate also a binary in the path printed at the end of the command `stack install`, e.g. on Ubuntu Linux `$HOME/.local/bin`. You can check its usage by executing the command
 
