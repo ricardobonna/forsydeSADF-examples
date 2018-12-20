@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.5 && < 5
 - matrix
 - forsyde-shallow >= 3.3.3.0
+- deepseq
 
 library:
   source-dirs: src
@@ -32,9 +33,7 @@ executables:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+    - -O2
     dependencies:
     - forsyde-sadf-examples
 
