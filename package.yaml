@@ -24,6 +24,7 @@ dependencies:
 - matrix
 - forsyde-shallow >= 3.3.3.0
 - deepseq
+- parallel
 
 library:
   source-dirs: src

@@ -14,7 +14,7 @@
 
 module MPEG4 where
 
-import ForSyDe.Shallow
+import ForSyDe.Shallow hiding (Matrix, matrix)
 import Data.Matrix    -- use cabal install matrix to instal the matrix package
 
 ----------------------------------------------------------
@@ -189,6 +189,7 @@ kernelRC = kernel22SADF
 ----------------------------------------------------------
 --            Process Network definition
 ----------------------------------------------------------
+
 
 pnMPEG4 :: Int -> Int -> (Int, Int) -> Signal String -> Signal MacroBlock -> Signal Frame
 pnMPEG4 bs nb fs sigft sigmb = sigout

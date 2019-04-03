@@ -2,17 +2,21 @@
 
 BINARY=forsyde-sadf-exe
 EXP_FILE=experiments.dat
+PYTHON_MPEG=~/Documents/python-MoC/examples/MPEG4/MPEG4.py
+MBINP_PATH=~/Documents/python-MoC/examples/MPEG4/mbInputs.inp
+FTINP_PATH=~/Documents/python-MoC/examples/MPEG4/ft.inp
 
-bss="4 8 16"
-samps=$(seq 500 500 4000)
-fss="16 32 128 512 1024 2048"
+bss="8"
+samps="100"
+fss="16 32"
 
 echo "" > $EXP_FILE
 for bs in $bss; do
     for fs in $fss; do
-	for nSamp in $samps; do
-	    echo "Running for fsx=$fs fsy=$fs bs=$bs nsamp=$nSamp..."
-	    $BINARY $fs $fs $bs $nSamp >> $EXP_FILE
-	done
+	      for nSamp in $samps; do
+	        echo "Running for fsx=$fs fsy=$fs bs=$bs nsamp=$nSamp..."
+          python3 $PYTHON_MPEG $fs $fs $bs $nSamp >> $EXP_FILE
+	        $BINARY $fs $fs $bs $FTINP_PATH $MBINP_PATH >> $EXP_FILE
+	      done
     done
 done

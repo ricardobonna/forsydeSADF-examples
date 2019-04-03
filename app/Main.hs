@@ -2,23 +2,24 @@ module Main where
 
 import MPEG4
 
-import ForSyDe.Shallow
+import ForSyDe.Shallow hiding (Matrix, matrix)
 
 import Text.Printf
 import Control.Exception
 import System.CPUTime
+import Control.Parallel.Strategies
 import Control.Monad
 import Control.DeepSeq
 import System.Environment
 import Data.Matrix    -- use cabal install matrix to instal the matrix package
-
+import Data.List
 ----------------------------------------------------------
 --                       Tests
 ----------------------------------------------------------
 
 
 lim :: Int
-lim = 10^5
+lim = 1
 
 instance NFData a => NFData (Signal a) where rnf = rnf . fromSignal
 
@@ -42,26 +43,60 @@ ispow2 a | a == 2 && a > 0 = True
 
 main = do
   a <- getArgs
-  let [infsx, infsy, inbs, nSamp] = map read a :: [Int]
+  let params = take 3 a
+      ftPath = head $ drop 3 a
+      mbPath = head $ drop 4 a
+  ftFile <- readFile ftPath
+  mbFile <- readFile mbPath
+  let [infsx, infsy, inbs] = map read params :: [Int]
       -- read and check bs, fs and calculate nb
       bs | (ispow2 inbs) && (inbs <= 16) = inbs
       fs | infsx `mod` bs == 0 && infsy `mod` bs == 0 = (infsx,infsy)
       nb = div (uncurry (*) fs) (bs^2)
       -- create FT signal
-      ftSig = signal $ cycle $ ["I"] ++ (map ((++) "P" . show) [1..(nb-1)])
-      -- create input signal
-      inSig = signal $ cycle $ genIBlocks ++ (concat . map genPBlocks) [1..(nb-1)]
-      -- generator for I blocks
-      genIBlocks = frame2mblocks (1,1) (bs,bs) idFrame
-      idFrame = uncurry matrix fs $ \(i,j) -> if i == j then 1 else 0
-      -- generator for P blocks
-      genPBlocks x = take x $ cycle [pBlock1, pBlock2, pBlock3]
-      blockDummy = matrix bs bs $ \(i,j) -> (j-1)
-      pBlock1 = FullB {pos = (3,3), block = blockDummy, motionV = (0,-1)}
-      pBlock2 = FullB {pos = (3,1), block = blockDummy, motionV = (0,1)}
-      pBlock3 = FullB {pos = (3,3), block = blockDummy, motionV = (1,1)}
+      ftSig = signal $ read ftFile :: Signal String
+      mbSig = signal $ read mbFile :: Signal MacroBlock
+
+      inpSize = lengthS ftSig
+
   -- start "real" computation
-  let decoded = pnMPEG4 bs nb fs ftSig (takeS nSamp inSig)
+  let decoded = pnMPEG4 bs nb fs ftSig mbSig
   runtime <- time decoded
+  let fps = (fromIntegral inpSize) / runtime
   -- print out the stats
-  printf "%d\t%d\t%d\t%d\t%.9f\n" bs (fst fs * snd fs) nb nSamp runtime
+  printf "MPEG4 model ForSyDe\n"
+  printf "Frame size: (%d, %d)\nBlock size: %d\nNumber of frames: %d\nTime elapsed: %.4fs\nFPS: %.4f\n" (fst fs) (snd fs) bs inpSize runtime fps
+
+
+instance Read MacroBlock where
+  readsPrec _ x =
+    [ (PosB pos (fromLists blk), tail (dropWhile (/='}') x))
+    | ("PosB",r1) <- lex x
+    , (blk, _) <- reads $ inBetween "[[" "]]" x
+    , (pos,r4) <- reads $ dropWhile (/='(') $ inBetween "pos = (" ")" x
+    ] ++
+    [ (FullB pos mot (fromLists blk), tail (dropWhile (/='}') x))
+    | ("FullB",r1) <- lex x
+    , (blk, _) <- reads $ inBetween "[[" "]]" x
+    , (mot, _) <- reads $ dropWhile (/='(') $ inBetween "motionV = " ")" x
+    , (pos, _) <- reads $ dropWhile (/='(') $ inBetween "pos = (" ")" x
+    ]
+
+takeUntil :: String -> String -> String
+takeUntil [] [] = []                           --don't need this
+takeUntil xs [] = []
+takeUntil [] ys = []
+takeUntil xs (y:ys) = if   isPrefixOf xs (y:ys)
+                      then xs
+                      else y:(takeUntil xs (tail (y:ys)))
+
+dropUntil :: String -> String -> String
+dropUntil [] [] = []                           --don't need this
+dropUntil xs [] = []
+dropUntil [] ys = []
+dropUntil xs (y:ys) = if   isPrefixOf xs (y:ys)
+                      then (y:ys)
+                      else dropUntil xs ys
+
+inBetween :: String -> String -> String -> String
+inBetween left right = takeUntil right . dropUntil left
